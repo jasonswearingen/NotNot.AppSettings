@@ -1,12 +1,25 @@
-# winget install GitTools.GitVersion then run gitversion init to make this file
 assembly-versioning-scheme: MajorMinorPatchTag
-mode: ContinuousDeployment
-next-version: 0.9.0
-branches:
+mode: MainLine
+next-version: 0.10.0
+branches: 
+  main:
+    regex: ^main$
+    tag: ''
+    is-release-branch: true
+    source-branches: []
+    increment: Patch
   default:
     tag: '{BranchName}'
     regex: ^.*$ # match all branches
+    mode: ContinuousDeployment
     source-branches: [] # match all branches
+  # release:
+  #   regex: release[/-]
+  #   mode: ContinuousDeployment
+  #   tag: ''
+  #   is-release-branch: true
+  #   source-branches: ['main', 'develop']
+  #   increment: Patch
 ignore:
   sha: []
 merge-message-formats: {}
