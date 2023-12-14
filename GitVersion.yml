@@ -1,6 +1,6 @@
 assembly-versioning-scheme: MajorMinorPatchTag
 mode: ContinuousDeployment
-next-version: 0.10.2
+next-version: 0.10.3
 branches:
   release:
     mode: ContinuousDelivery

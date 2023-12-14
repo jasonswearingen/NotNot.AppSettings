@@ -134,7 +134,6 @@ namespace {startingNamespace};
 /// <para>You can use this directly, extend it (it's a partial class), 
 /// or get a populated instance of it via the <see cref=""AppSettingsBinder""/> DI service</para>
 /// </summary>
-[CompilerGenerated]
 public partial class AppSettings
 {{
 }}
