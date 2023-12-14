@@ -5,7 +5,7 @@ Automatically create strongly typed C# settings objects from AppSettings.json. U
 ## Getting Started
 
 1) Add a `appsettings.json` file to your project *(make sure it's copied to the output)*.
-2) Install this nuget package `NotNot.AppSettings`.
+2) **[Install this nuget package `NotNot.AppSettings`](https://www.nuget.org/packages/NotNot.AppSettings)**.
 3) Build your project
 4) Use the generated `AppSettings` class in your code. (See the example section below).
 
