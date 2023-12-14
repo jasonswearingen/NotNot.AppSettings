@@ -1,20 +1,21 @@
 # NotNot.AppSettings
-Auto-generate strongly typed C# settings objects from your AppSettings.json.
+
+Automatically create strongly typed C# settings objects from AppSettings.json. Uses Source Generators.
 
 ## Getting Started
 
-1) Add a `appsettings.json` file to your project *(make sure it's coppied to the output)*.
+1) Add a `appsettings.json` file to your project *(make sure it's copied to the output)*.
 2) Install this nuget package `NotNot.AppSettings`.
 3) Build your project
-4) Use the generated `AppSettings` class in your code. (See example below).
-   
+4) Use the generated `AppSettings` class in your code. (See the example section below).
 
 ## How it works
 
-This package uses Source Generators to generate a strongly typed class from your appsettings.json file.
+During your project's build process, NotNot.AppSettings will read your `appsettings.json` and `appsettings.{environment}.json` and,
+using source-generators, creates a set of csharp classes that strongly types each node in the json hierarchy.
 
-After building your project, a strongly typed `AppSettings` class and an `AppSettingsBinder` helper/loader util will be found 
-under the `[YourProjectRootNamespace].AppSettingsGen` namespace.
+After building your project, a strongly typed `AppSettings` class contains the strongly-typed definition,
+and an `AppSettingsBinder` helper/loader util will be found under the `{YourProjectRootNamespace}.AppSettingsGen` namespace.
 
 ## Example
 
@@ -58,28 +59,28 @@ public class Program
    }
 }
 ```
+*See the **`./NotNot.AppSettings.Example`** folder in the repository for a fully buildable version of this example.*
 
+## Troubleshooting / Tips
 
-## Q&A
-
-#### How to extend the generated `AppSettings` class?
+### How to extend the generated `AppSettings` class?
 
 You can extend any/all of the generated code by creating a partial class in the same namespace.
 
-#### Some settings not being loaded (value is `NULL`). Or:  My `appSettings.Development.json` file is not loaded
+### Some settings not being loaded (value is `NULL`). Or:  My `appSettings.Development.json` file is not loaded
 
 Ensure the proper environment variable is set.   For example, The `appSettings.Development.json` file is only loaded when the `ASPNETCORE_ENVIRONMENT` 
 or `DOTNET_ENVIORNMENT` environment variable is set to `Development`.
 
-#### Intellisense not working for `AppSettings` class
+### Intellisense not working for `AppSettings` class
 
 A strongly-typed `AppSettings` (and sub-classes) is recreated every time you build your project. 
 This may confuse your IDE and you might need to restart it to get intellisense working again.
 
-#### Tip: Backup generated code in your git repository
+### Tip: Backup generated code in your git repository
 
-Add this to your `.csproj` to have the generated code output to an ***ignored*** folder in your project.
-this way you can check it into source control and have a backup of the generated code in case you need to stop using this package.
+Add this to your `.csproj` to have the code output to `./Generated` and have it be ***ignored*** by your project.
+This way you can check it into source control and have a backup of the generated code in case you need to stop using this package.
 ```xml
 <!--output the source generator build files-->
 <Target Name="DeleteFolder" BeforeTargets="PreBuildEvent">
@@ -95,10 +96,18 @@ this way you can check it into source control and have a backup of the generated
 </ItemGroup>
 ```
 
+## Contribute
 
+- If you find value from this project, consider sponsoring.
 
-## License MPL-2.0
+## Acknowledgments
 
-[Read about the MPL-2.0 at TldrLegal](https://www.tldrlegal.com/license/mozilla-public-license-2-0-mpl-2)
+- This project was inspired by https://github.com/FrodeHus/AppSettingsSourceGenerator which unfortunately did not match my needs in fundamental ways.
 
-You can basically use this project however you want, but all source-code changes to it must be made open source.
+## License: MPL-2.0
+
+A summary from [TldrLegal](https://www.tldrlegal.com/license/mozilla-public-license-2-0-mpl-2):
+
+   MPL is a copyleft license that is easy to comply with. You must make the source code for any of your changes available under MPL, but you can combine the MPL software with proprietary code, as long as you keep the MPL code in separate files. Version 2.0 is, by default, compatible with LGPL and GPL version 2 or greater. You can distribute binaries under a proprietary license, as long as you make the source available under MPL.
+
+In brief: You can basically use this project however you want, but all changes to it must be open sourced.

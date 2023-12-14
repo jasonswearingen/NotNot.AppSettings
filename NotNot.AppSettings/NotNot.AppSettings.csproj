@@ -20,6 +20,14 @@
 	-->
 		<ItemGroup>
 			<None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+			<None Include="..\meta\logos\[!!]-logos_red_cropped.png">
+			  <Pack>True</Pack>
+			  <PackagePath>\</PackagePath>
+			</None>
+			<None Include="..\README.md">
+			  <Pack>True</Pack>
+			  <PackagePath>\</PackagePath>
+			</None>
 			<None Include="C:\repos\vUnified\dev\public\NotNot.SourceGenerator.AppSettings\.editorconfig" />
 			<PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
 			<PackageReference Include="System.Buffers" Version="4.5.1" GeneratePathProperty="true" PrivateAssets="all" />
@@ -75,6 +83,13 @@
 			<!--for other macro properties, see https://learn.microsoft.com/en-us/visualstudio/msbuild/common-msbuild-project-properties?view=vs-2022 -->
 			<PackageOutputPath>$(SolutionDir).nuget-test-packages\$(AssemblyName)</PackageOutputPath>
 			<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+			<PackageProjectUrl>https://github.com/jasonswearingen/NotNot.AppSettings</PackageProjectUrl>
+			<Copyright>Jason Swearingen</Copyright>
+			<RepositoryUrl>https://github.com/jasonswearingen/NotNot.AppSettings</RepositoryUrl>
+			<PackageIcon>[!!]-logos_red_cropped.png</PackageIcon>
+			<PackageReadmeFile>README.md</PackageReadmeFile>
+			<PackageTags>AppSettings; Source Generator; Json; </PackageTags>
+			<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
 		</PropertyGroup>
 
 		<ItemGroup>
