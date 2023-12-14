@@ -125,7 +125,6 @@ internal class AppSettingsGen : IIncrementalGenerator
 **/
 
 using Microsoft.Extensions.Configuration;
-using System.Runtime.CompilerServices;
 namespace {startingNamespace};
 
 
@@ -147,7 +146,6 @@ public partial class AppSettings
 /// <para><strong>Non-DI Usage:</strong></para>
 /// <para><c>var appSettings = AppSettingsBinder.LoadDirect();</c></para>
 /// </summary>
-[CompilerGenerated]
 public partial class AppSettingsBinder : IAppSettingsBinder
 {{
    public AppSettings AppSettings {{ get; protected set; }}
@@ -216,7 +214,6 @@ public partial class AppSettingsBinder : IAppSettingsBinder
 /// <para><strong>Non-DI Usage:</strong></para>
 /// <para><c>var appSettings = AppSettingsBinder.LoadDirect();</c></para>
 /// </summary>
-[CompilerGenerated]
 public interface IAppSettingsBinder
 {{
    public AppSettings AppSettings {{ get; }}
