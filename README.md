@@ -11,8 +11,7 @@ Automatically create strongly typed C# settings objects from AppSettings.json. U
 
 ## How it works
 
-During your project's build process, NotNot.AppSettings will read your `appsettings.json` and `appsettings.{environment}.json` and,
-using source-generators, creates a set of csharp classes that matches each node in the json hierarchy.
+During your project's build process, NotNot.AppSettings will parse the  `appsettings*.json` in your project's root folder.  Using source-generators it then creates a set of csharp classes that matches each node in the json hierarchy.
 
 After building your project, an `AppSettings` class contains the strongly-typed definitions,
 and an `AppSettingsBinder` helper/loader util will be found under the `{YourProjectRootNamespace}.AppSettingsGen` namespace.
