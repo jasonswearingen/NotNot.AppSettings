@@ -1,9 +1,9 @@
 assembly-versioning-scheme: MajorMinorPatchTag
-mode: MainLine
-next-version: 0.10.0
+mode: ContinuousDeployment
+next-version: 0.10.1
 branches: 
-  main:
-    regex: ^main$
+  release:
+    regex: ^release$
     tag: ''
     is-release-branch: true
     source-branches: []
@@ -11,7 +11,7 @@ branches:
   default:
     tag: '{BranchName}'
     regex: ^.*$ # match all branches
-    mode: ContinuousDeployment
+    #mode: ContinuousDeployment
     source-branches: [] # match all branches
   # release:
   #   regex: release[/-]

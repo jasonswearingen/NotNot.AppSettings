@@ -73,7 +73,7 @@
 			<GetTargetPathDependsOn>$(GetTargetPathDependsOn);GetDependencyTargetPaths</GetTargetPathDependsOn>
 			<Title>NotNot.AppSettings</Title>
 			<Authors>Jason Swearingen</Authors>
-			<Description>Auto-generate strongly typed C# settings objects from your AppSettings.json.  </Description>
+			<Description>Automatically create strongly typed C# settings objects from AppSettings.json. Uses Source Generators.</Description>
 		</PropertyGroup>
 
 		<PropertyGroup>

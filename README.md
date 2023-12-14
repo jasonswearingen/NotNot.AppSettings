@@ -12,9 +12,9 @@ Automatically create strongly typed C# settings objects from AppSettings.json. U
 ## How it works
 
 During your project's build process, NotNot.AppSettings will read your `appsettings.json` and `appsettings.{environment}.json` and,
-using source-generators, creates a set of csharp classes that strongly types each node in the json hierarchy.
+using source-generators, creates a set of csharp classes that matches each node in the json hierarchy.
 
-After building your project, a strongly typed `AppSettings` class contains the strongly-typed definition,
+After building your project, an `AppSettings` class contains the strongly-typed definitions,
 and an `AppSettingsBinder` helper/loader util will be found under the `{YourProjectRootNamespace}.AppSettingsGen` namespace.
 
 ## Example
@@ -110,4 +110,11 @@ A summary from [TldrLegal](https://www.tldrlegal.com/license/mozilla-public-lice
 
    MPL is a copyleft license that is easy to comply with. You must make the source code for any of your changes available under MPL, but you can combine the MPL software with proprietary code, as long as you keep the MPL code in separate files. Version 2.0 is, by default, compatible with LGPL and GPL version 2 or greater. You can distribute binaries under a proprietary license, as long as you make the source available under MPL.
 
-In brief: You can basically use this project however you want, but all changes to it must be open sourced.
+**In brief**: You can basically use this project however you want, but all changes to it must be open sourced.
+
+## Changes
+ 
+- `0.10.x` :  various polish
+  - mark generated code with `[CompilerGenerated]`.  
+  - readme/nuget tweaks.
+- `0.10.0` : Initial Release.

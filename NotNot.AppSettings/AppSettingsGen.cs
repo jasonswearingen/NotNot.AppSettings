@@ -133,6 +133,7 @@ namespace {startingNamespace};
 /// <para>You can use this directly, extend it (it's a partial class), 
 /// or get a populated instance of it via the <see cref=""AppSettingsBinder""/> DI service</para>
 /// </summary>
+[CompilerGenerated]
 public partial class AppSettings
 {{
 }}
@@ -146,6 +147,7 @@ public partial class AppSettings
 /// <para><strong>Non-DI Usage:</strong></para>
 /// <para><c>var appSettings = AppSettingsBinder.LoadDirect();</c></para>
 /// </summary>
+[CompilerGenerated]
 public partial class AppSettingsBinder : IAppSettingsBinder
 {{
    public AppSettings AppSettings {{ get; protected set; }}
@@ -214,6 +216,7 @@ public partial class AppSettingsBinder : IAppSettingsBinder
 /// <para><strong>Non-DI Usage:</strong></para>
 /// <para><c>var appSettings = AppSettingsBinder.LoadDirect();</c></para>
 /// </summary>
+[CompilerGenerated]
 public interface IAppSettingsBinder
 {{
    public AppSettings AppSettings {{ get; }}
@@ -314,6 +317,7 @@ public interface IAppSettingsBinder
 using System;
 namespace {currentNamespace};
 
+[CompilerGenerated]
 public partial class {currentClassName} {{
 {propertyBuilder}
 }}
