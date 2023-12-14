@@ -1,0 +1,12 @@
+
+# File header template  https://docs.microsoft.com/en-us/visualstudio/ide/reference/add-file-header?view=vs-2019
+file_header_template = [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] \n[!!] Copyright ©️ Jason Swearingen \n[!!] This file is licensed to you under the MPL-2.0.\n[!!] See the LICENSE.md file in the project root for more info. \n[!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!] [!!]  [!!] [!!] [!!] [!!] 
+
+
+# All files
+[*]
+indent_style = tab
+
+# Xml files
+[*.xml]
+indent_size = 2

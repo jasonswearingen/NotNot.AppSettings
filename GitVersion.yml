@@ -1,0 +1,11 @@
+# winget install GitTools.GitVersion then run gitversion init to make this file
+assembly-versioning-scheme: MajorMinorPatchTag
+mode: ContinuousDeployment
+branches:
+  default:
+    regex: ^.*$ # match all branches
+    tag: "{BranchName}"
+    source-branches: [] # match all branches
+ignore:
+  sha: []
+merge-message-formats: {}

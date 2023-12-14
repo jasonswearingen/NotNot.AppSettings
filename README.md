@@ -1,2 +1,104 @@
 # NotNot.AppSettings
 Auto-generate strongly typed C# settings objects from your AppSettings.json.
+
+## Getting Started
+
+1) Add a `appsettings.json` file to your project *(make sure it's coppied to the output)*.
+2) Install this nuget package `NotNot.AppSettings`.
+3) Build your project
+4) Use the generated `AppSettings` class in your code. (See example below).
+   
+
+## How it works
+
+This package uses Source Generators to generate a strongly typed class from your appsettings.json file.
+
+After building your project, a strongly typed `AppSettings` class and an `AppSettingsBinder` helper/loader util will be found 
+under the `[YourProjectRootNamespace].AppSettingsGen` namespace.
+
+## Example
+
+`appsettings.json`
+
+```json
+{
+  "Hello": {
+	"World": "Hello back at you!"
+  }
+}
+```
+
+`Program.cs`
+
+```csharp
+using ExampleApp.AppSettingsGen;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+namespace ExampleApp;
+public class Program
+{ 
+   public static async Task Main(string[] args)
+   {
+      {
+         Console.WriteLine("NON-DI EXAMPLE");
+                  
+         var appSettings = ExampleApp.AppSettingsGen.AppSettingsBinder.LoadDirect();
+         Console.WriteLine(appSettings.Hello.World);         
+      }
+      {
+         Console.WriteLine("DI EXAMPLE");
+
+         HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+         builder.Services.AddSingleton<IAppSettingsBinder, AppSettingsBinder>();
+         var app = builder.Build();
+         var appSettings = app.Services.GetRequiredService<IAppSettingsBinder>().AppSettings;
+         Console.WriteLine(appSettings.Hello.World);
+      }
+   }
+}
+```
+
+
+## Q&A
+
+#### How to extend the generated `AppSettings` class?
+
+You can extend any/all of the generated code by creating a partial class in the same namespace.
+
+#### Some settings not being loaded (value is `NULL`). Or:  My `appSettings.Development.json` file is not loaded
+
+Ensure the proper environment variable is set.   For example, The `appSettings.Development.json` file is only loaded when the `ASPNETCORE_ENVIRONMENT` 
+or `DOTNET_ENVIORNMENT` environment variable is set to `Development`.
+
+#### Intellisense not working for `AppSettings` class
+
+A strongly-typed `AppSettings` (and sub-classes) is recreated every time you build your project. 
+This may confuse your IDE and you might need to restart it to get intellisense working again.
+
+#### Tip: Backup generated code in your git repository
+
+Add this to your `.csproj` to have the generated code output to an ***ignored*** folder in your project.
+this way you can check it into source control and have a backup of the generated code in case you need to stop using this package.
+```xml
+<!--output the source generator build files-->
+<Target Name="DeleteFolder" BeforeTargets="PreBuildEvent">
+	<RemoveDir Directories="$(CompilerGeneratedFilesOutputPath)" />
+</Target>	
+<PropertyGroup>
+	<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+	<CompilerGeneratedFilesOutputPath>Generated</CompilerGeneratedFilesOutputPath>
+</PropertyGroup>
+<ItemGroup>
+	<!--Exclude the output of source generators from the compilation-->
+	<Compile Remove="$(CompilerGeneratedFilesOutputPath)/**" />
+</ItemGroup>
+```
+
+
+
+## License MPL-2.0
+
+[Read about the MPL-2.0 at TldrLegal](https://www.tldrlegal.com/license/mozilla-public-license-2-0-mpl-2)
+
+You can basically use this project however you want, but all source-code changes to it must be made open source.
