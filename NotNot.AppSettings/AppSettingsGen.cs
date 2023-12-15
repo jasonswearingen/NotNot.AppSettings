@@ -20,105 +20,216 @@ namespace NotNot;
 [Generator]
 internal class AppSettingsGen : IIncrementalGenerator
 {
-   public void Initialize(IncrementalGeneratorInitializationContext context)
-   {
+	public void Initialize(IncrementalGeneratorInitializationContext context)
+	{
 #if DEBUG
-      //////if enabled, this will allow you to attach and debug sourcegen when building the target project.
-      //if (!Debugger.IsAttached)
-      //{
-      //   Debugger.Launch();
-      //}
+		//////if enabled, this will allow you to attach and debug sourcegen when building the target project.
+		//if (!Debugger.IsAttached)
+		//{
+		//   Debugger.Launch();
+		//}
 #endif
 
 
-      var projectDirProvider = context.AnalyzerConfigOptionsProvider
-          .Select(static (provider, ct) =>
-          {
-             provider.GlobalOptions.TryGetValue("build_property.projectdir", out string? projectDirectory);
-             provider.GlobalOptions.TryGetValue("build_property.rootnamespace", out string? assemblyName);
+		/////////////  NEW ADDITIONAL FILES WORKFLOW
+		{
+			//get appsettings*.json via AdditionalFiles
+			var additionalFiles = context.AdditionalTextsProvider.Where(static file =>
+				file.Path.StartsWith("appsettings.", StringComparison.OrdinalIgnoreCase) &&
+				file.Path.EndsWith(".json", StringComparison.OrdinalIgnoreCase));
 
-             return (projectDirectory,assemblyName);
-          });
+			// Transform additionalFiles to a single Dictionary entry
+			var combinedSourceTextsProvider = additionalFiles.Collect().Select((files, ct) =>
+			{
+				var combinedFiles = new Dictionary<string, SourceText>();
+				foreach (var file in files)
+				{
+					// Assuming file content is to be stored as SourceText
+					var sourceText = file.GetText(ct);
+					if (sourceText != null)
+					{
+						combinedFiles[file.Path] = sourceText;
+					}
+				}
 
-
-      context.RegisterSourceOutput(
-         projectDirProvider,
-          (spc,settings) => { 
-             ExecuteGenerator(spc, settings);
-
-
-          });
-
-   }
-
-   public void ExecuteGenerator(SourceProductionContext spc, (string? projectDirectory, string? startingNamespace) settings)
-   {
-      var diagReports = new List<Diagnostic>();
-
-      var results = GenerateSourceFiles(settings, diagReports);
-
-      foreach(var report in diagReports)
-      {
-         spc.ReportDiagnostic(report);
-      }
-      foreach ( var result in results )
-      {
-         spc.AddSource(result.Key, result.Value);
-      }
-      spc._Info("done");
-   }
-   /// <summary>
-   /// for the given fileSearchPattern, will generate strongly typed c# classes for each matched (appsettings).json file found in the projectDirectory
-   /// </summary>
-   /// <param name="settings"></param>
-   /// <param name="diagReport">helper for accumulating diag messages.  caller should relay them to appropriate log writer afterwards.</param>
-   /// <param name="fileSearchPattern">defaults to "appsettings*.json"</param>
-   /// <returns></returns>
-   public Dictionary<string,SourceText> GenerateSourceFiles((string? projectDirectory, string? startingNamespace) settings,List<Diagnostic> diagReport, string fileSearchPattern= "appsettings*.json")
-   {    
-      var (projectDir, startingNamespace) = settings;
-      var toReturn = new Dictionary<string, SourceText>();
-
-      if (projectDir is null || startingNamespace is null)
-      {
-         diagReport._Error($"null required inputs  projectDir={projectDir}, startingNamespace={startingNamespace}");
-         return toReturn;
-      }
-      else
-      {
-         diagReport._Info($"projectDir {projectDir} ");
-      }
-
-      startingNamespace = $"{startingNamespace}.AppSettingsGen";
-
-      //do stuff with project dir
-      var dir = new DirectoryInfo(projectDir);
-      var files = dir.EnumerateFiles(fileSearchPattern, SearchOption.TopDirectoryOnly).ToList();
-      diagReport._Info($"files count {files.Count()} ");
+				return combinedFiles;
+			});
 
 
-      //merge into one big json
-      var allJsonDict = JsonMerger.MergeJsonFiles(files, diagReport);
+			var namespaceProvider = context.AnalyzerConfigOptionsProvider
+				.Select(static (provider, ct) =>
+				{
+					provider.GlobalOptions.TryGetValue("build_property.rootnamespace", out string? rootNamespace);
+					return rootNamespace;
+				});
 
-      //generate classes for the entire json hiearchy
-      GenerateFilesWorker(diagReport, toReturn, allJsonDict, "AppSettings", $"{startingNamespace}");
-      
-      AddBinderShims(diagReport, toReturn, startingNamespace);
+			var combinedProvider = namespaceProvider.Combine(combinedSourceTextsProvider);
 
-      return toReturn;
 
-   }
 
-   /// <summary>
-   /// add helper service to automatically populate appsettings from IConfiguration
-   /// </summary>
-   /// <param name="diagReport"></param>
-   /// <param name="toReturn"></param>
-   /// <param name="startingNamespace"></param>
-   private void AddBinderShims(List<Diagnostic> diagReport, Dictionary<string, SourceText> toReturn, string startingNamespace)
-   {
-      var builder = new StringBuilder();
-      builder.Append(@$"
+			context.RegisterSourceOutput(
+				combinedProvider,
+				(spc, content) =>
+				{
+					var rootNamespace = content.Left;
+					var combinedSourceTexts = content.Right;
+
+					ExecuteGenerator_AdditionalFiles(spc, rootNamespace, combinedSourceTexts);
+				});
+
+		}
+
+		//////////////  OLD FILE IO WORKFLOW
+		{
+			var projectDirProvider = context.AnalyzerConfigOptionsProvider
+				 .Select(static (provider, ct) =>
+				 {
+					 provider.GlobalOptions.TryGetValue("build_property.projectdir", out string? projectDirectory);
+					 provider.GlobalOptions.TryGetValue("build_property.rootnamespace", out string? assemblyName);
+
+					 return (projectDirectory, assemblyName);
+				 });
+
+
+			context.RegisterSourceOutput(
+				projectDirProvider,
+				 (spc, settings) =>
+				 {
+					 ExecuteGenerator_FileIo(spc, settings);
+
+
+				 });
+		}
+	}
+
+	public void ExecuteGenerator_AdditionalFiles(SourceProductionContext spc, string rootNamespace, Dictionary<string, SourceText> combinedSourceTexts)
+	{
+		var diagReports = new List<Diagnostic>();
+
+		var results = GenerateSourceFiles_AdditionalFiles(rootNamespace, combinedSourceTexts, diagReports);
+
+		foreach (var report in diagReports)
+		{
+			spc.ReportDiagnostic(report);
+		}
+		foreach (var result in results)
+		{
+			spc.AddSource(result.Key, result.Value);
+		}
+		spc._Info("done");
+	}
+	/// <summary>
+	/// for the given fileSearchPattern, will generate strongly typed c# classes for each matched (appsettings).json file found in the projectDirectory
+	/// </summary>
+	/// <param name="settings"></param>
+	/// <param name="diagReport">helper for accumulating diag messages.  caller should relay them to appropriate log writer afterwards.</param>
+	/// <param name="fileSearchPattern">defaults to "appsettings*.json"</param>
+	/// <returns></returns>
+	public Dictionary<string, SourceText> GenerateSourceFiles_AdditionalFiles(string rootNamespace, Dictionary<string, SourceText> combinedSourceTexts, List<Diagnostic> diagReport)
+	{
+
+		var toReturn = new Dictionary<string, SourceText>();
+
+		if (rootNamespace is null || combinedSourceTexts.Count==0)
+		{
+			diagReport._Error($"null required inputs  rootNamespace={rootNamespace}, combinedSourceTexts.Count={combinedSourceTexts.Count}");
+			return toReturn;
+		}
+		else
+		{
+			diagReport._Info($"rootNamespace={rootNamespace}, combinedSourceTexts.Count={combinedSourceTexts.Count}");
+		}
+
+		var startingNamespace = $"{rootNamespace}.AppSettingsGen";
+
+
+		//merge into one big json
+		var allJsonDict = JsonMerger.MergeJsonFiles(combinedSourceTexts, diagReport);
+
+		//generate classes for the entire json hiearchy
+		GenerateFilesWorker(diagReport, toReturn, allJsonDict, "AppSettings", $"{startingNamespace}");
+
+		AddBinderShims(diagReport, toReturn, startingNamespace);
+
+		return toReturn;
+
+	}
+
+	public void ExecuteGenerator_FileIo(SourceProductionContext spc, (string? projectDirectory, string? startingNamespace) settings)
+	{
+
+
+
+		var diagReports = new List<Diagnostic>();
+
+		var results = GenerateSourceFiles(settings, diagReports);
+
+		foreach (var report in diagReports)
+		{
+			spc.ReportDiagnostic(report);
+		}
+		foreach (var result in results)
+		{
+			spc.AddSource(result.Key, result.Value);
+		}
+		spc._Info("done");
+	}
+	/// <summary>
+	/// for the given fileSearchPattern, will generate strongly typed c# classes for each matched (appsettings).json file found in the projectDirectory
+	/// </summary>
+	/// <param name="settings"></param>
+	/// <param name="diagReport">helper for accumulating diag messages.  caller should relay them to appropriate log writer afterwards.</param>
+	/// <param name="fileSearchPattern">defaults to "appsettings*.json"</param>
+	/// <returns></returns>
+	public Dictionary<string, SourceText> GenerateSourceFiles((string? projectDirectory
+		, string? startingNamespace) settings, List<Diagnostic> diagReport
+		, string fileSearchPattern = "appsettings*.json")
+	{
+		var (projectDir, startingNamespace) = settings;
+		var toReturn = new Dictionary<string, SourceText>();
+
+		if (projectDir is null || startingNamespace is null)
+		{
+			diagReport._Error($"null required inputs  projectDir={projectDir}, startingNamespace={startingNamespace}");
+			return toReturn;
+		}
+		else
+		{
+			diagReport._Info($"projectDir {projectDir} ");
+		}
+
+		startingNamespace = $"{startingNamespace}.AppSettingsGen";
+
+		//do stuff with project dir
+		var dir = new DirectoryInfo(projectDir);
+		var files = dir.EnumerateFiles(fileSearchPattern, SearchOption.TopDirectoryOnly).ToList();
+		diagReport._Info($"files count {files.Count()} ");
+
+
+
+
+		//merge into one big json
+		var allJsonDict = JsonMerger.MergeJsonFiles(files, diagReport);
+
+		//generate classes for the entire json hiearchy
+		GenerateFilesWorker(diagReport, toReturn, allJsonDict, "AppSettings", $"{startingNamespace}");
+
+		AddBinderShims(diagReport, toReturn, startingNamespace);
+
+		return toReturn;
+
+	}
+
+	/// <summary>
+	/// add helper service to automatically populate appsettings from IConfiguration
+	/// </summary>
+	/// <param name="diagReport"></param>
+	/// <param name="toReturn"></param>
+	/// <param name="startingNamespace"></param>
+	private void AddBinderShims(List<Diagnostic> diagReport, Dictionary<string, SourceText> toReturn, string startingNamespace)
+	{
+		var builder = new StringBuilder();
+		builder.Append(@$"
 /** 
  * This file is generated by the NotNot.SourceGenerator.AppSettings nuget package.
  * Do not edit this file directly, instead edit the appsettings.json files and rebuild the project.
@@ -220,93 +331,93 @@ public interface IAppSettingsBinder
 }}
 ");
 
-      var source = SourceText.From(builder.ToString(), Encoding.UTF8);
-      toReturn.Add("_BinderShims.cs", source);
+		var source = SourceText.From(builder.ToString(), Encoding.UTF8);
+		toReturn.Add("_BinderShims.cs", source);
 
-   }
+	}
 
-   /// <summary>
-   /// get the c# type of the element.  however keep in mind that arrays won't include the '[]'.  Check if array via elm.ValueKind == JsonValueKind.Array
-   /// </summary>
-   /// <param name="elm"></param>
-   /// <param name="currentName"></param>
-   /// <param name="currentNamespace"></param>
-   /// <returns>returns name of json primitive, "object" for null/undefined nodes,  named nodes for other json objects</returns>
-   /// <exception cref="ArgumentException"></exception>
-   public string GetSourceTypeName(JsonElement elm, string currentName, string currentNamespace)
-   {
-      string toReturn;
-      switch(elm.ValueKind)
-      {
-         case JsonValueKind.String:
-            toReturn = "string";
-            break;
-         case JsonValueKind.Number:
-            toReturn = "double";
-            break;
-         case JsonValueKind.True:
-         case JsonValueKind.False:
-            toReturn = "bool";
-            break;
-         case JsonValueKind.Null:
-         case JsonValueKind.Undefined:
-            toReturn = "object";
-            break;
-         case JsonValueKind.Object:
-            toReturn = $"{currentNamespace}.{currentName}";
-            break;
-         case JsonValueKind.Array:     
-            //unify all children into one type
-            //if mix of various types (such as object+primitive, or different primitive types), will return back "object" and user will have to cast manually.
-            string? unifiedChildType = null;
-            foreach(var child in elm.EnumerateArray())
-            {
-               var childType = GetSourceTypeName(child, currentName, currentNamespace);
-               if(unifiedChildType is null)
-               {
-                  unifiedChildType = childType;
-               }
-               else if(unifiedChildType != childType)
-               {
-                  unifiedChildType = "object";
-                  break;
-               }
-            }
-            unifiedChildType ??= "object";
-            toReturn = unifiedChildType;
-            break;
-         default:
-            throw new ArgumentException($"unknown type returned from json, {elm}", nameof(elm));
-      }
+	/// <summary>
+	/// get the c# type of the element.  however keep in mind that arrays won't include the '[]'.  Check if array via elm.ValueKind == JsonValueKind.Array
+	/// </summary>
+	/// <param name="elm"></param>
+	/// <param name="currentName"></param>
+	/// <param name="currentNamespace"></param>
+	/// <returns>returns name of json primitive, "object" for null/undefined nodes,  named nodes for other json objects</returns>
+	/// <exception cref="ArgumentException"></exception>
+	public string GetSourceTypeName(JsonElement elm, string currentName, string currentNamespace)
+	{
+		string toReturn;
+		switch (elm.ValueKind)
+		{
+			case JsonValueKind.String:
+				toReturn = "string";
+				break;
+			case JsonValueKind.Number:
+				toReturn = "double";
+				break;
+			case JsonValueKind.True:
+			case JsonValueKind.False:
+				toReturn = "bool";
+				break;
+			case JsonValueKind.Null:
+			case JsonValueKind.Undefined:
+				toReturn = "object";
+				break;
+			case JsonValueKind.Object:
+				toReturn = $"{currentNamespace}.{currentName}";
+				break;
+			case JsonValueKind.Array:
+				//unify all children into one type
+				//if mix of various types (such as object+primitive, or different primitive types), will return back "object" and user will have to cast manually.
+				string? unifiedChildType = null;
+				foreach (var child in elm.EnumerateArray())
+				{
+					var childType = GetSourceTypeName(child, currentName, currentNamespace);
+					if (unifiedChildType is null)
+					{
+						unifiedChildType = childType;
+					}
+					else if (unifiedChildType != childType)
+					{
+						unifiedChildType = "object";
+						break;
+					}
+				}
+				unifiedChildType ??= "object";
+				toReturn = unifiedChildType;
+				break;
+			default:
+				throw new ArgumentException($"unknown type returned from json, {elm}", nameof(elm));
+		}
 
-      return toReturn;
-   }
+		return toReturn;
+	}
 
 
-   /// <summary>
-   /// generate files for the given json hiearchy, recursively calling itself for each child node
-   /// </summary>
-   protected void GenerateFilesWorker(List<Diagnostic> diagReport, Dictionary<string, SourceText> generatedSourceFiles, Dictionary<string, JsonElement> currentNode, string currentNodeName, string currentNamespace)
-   {
-      //build currentNode into file
-      var currentClassName = currentNodeName._ConvertToAlphanumericCaps();
-      var filename = $"{currentNamespace}.{currentClassName}.cs";
+	/// <summary>
+	/// generate files for the given json hiearchy, recursively calling itself for each child node
+	/// </summary>
+	protected void GenerateFilesWorker(List<Diagnostic> diagReport, Dictionary<string, SourceText> generatedSourceFiles, Dictionary<string, JsonElement> currentNode, string currentNodeName, string currentNamespace)
+	{
+		//build currentNode into file
+		var currentClassName = currentNodeName._ConvertToAlphanumericCaps();
+		var filename = $"{currentNamespace}.{currentClassName}.cs";
 
-      var propertyBuilder = new StringBuilder();
-      foreach (var kvp in currentNode)
-      {
-         var propertyName = kvp.Key._ConvertToAlphanumericCaps();
-         var propertyNamespace = $"{currentNamespace}._{currentClassName}";
-         var valueType = GetSourceTypeName(kvp.Value, propertyName, propertyNamespace);
-         if(kvp.Value.ValueKind == JsonValueKind.Array)
-         {
-            valueType += "[]";
-         }
-         propertyBuilder.Append($"   public {valueType}? {propertyName}{{get; set;}}\n");
-      }
+		var propertyBuilder = new StringBuilder();
+		foreach (var kvp in currentNode)
+		{
+			var propertyName = kvp.Key._ConvertToAlphanumericCaps();
+			var propertyNamespace = $"{currentNamespace}._{currentClassName}";
+			var valueType = GetSourceTypeName(kvp.Value, propertyName, propertyNamespace);
+			if (kvp.Value.ValueKind == JsonValueKind.Array)
+			{
+				valueType += "[]";
+			}
+			propertyBuilder.Append($"   public {valueType}? {propertyName}{{get; set;}}\n");
+		}
 
-      var sourceBuilder = new StringBuilder();
-      sourceBuilder.Append(@$"
+		var sourceBuilder = new StringBuilder();
+		sourceBuilder.Append(@$"
 /** 
  * This file is generated by the NotNot.SourceGenerator.AppSettings nuget package.
  * Do not edit this file directly, instead edit the appsettings.json files and rebuild the project.
@@ -321,56 +432,56 @@ public partial class {currentClassName} {{
 }}
 ");
 
-      var source = SourceText.From(sourceBuilder.ToString(), Encoding.UTF8);
-      generatedSourceFiles.Add(filename, source);
+		var source = SourceText.From(sourceBuilder.ToString(), Encoding.UTF8);
+		generatedSourceFiles.Add(filename, source);
 
-      //recurse into children
-      foreach (var kvp in currentNode)
-      {
-         var propertyNamespace = $"{currentNamespace}._{currentClassName}";
-         var jsonKind = kvp.Value.ValueKind;
-         var propertyName = kvp.Key._ConvertToAlphanumericCaps();
-         switch (jsonKind)
-         {
-            case JsonValueKind.Object:
-               {
-                  var childNode = kvp.Value.Deserialize<Dictionary<string, JsonElement>>(JsonMerger._serializerOptions)!;
-                  GenerateFilesWorker(diagReport, generatedSourceFiles, childNode, propertyName, propertyNamespace);
-               }
-               break;
-            case JsonValueKind.Array:
-               {
-                  
-                  var childNodes = kvp.Value.Deserialize<List<JsonElement>>(JsonMerger._serializerOptions)!;
-                  //get name of node
-                  var arrayTypeName = GetSourceTypeName(kvp.Value, propertyName, propertyNamespace);
-                  switch (arrayTypeName)
-                  {
-                     case "string":
-                        case "double":
-                        case "bool":
-                        case "object": //returns object for null/undefined nodes.  (named nodes for other objects)
-                        //no need to recurse
-                        break;
-                     default:
-                        //squash children into singular object then generate for it
-                        var squashedChildren = new Dictionary<string, JsonElement>();
-                        foreach(var child in childNodes)
-                        {
-                           JsonMerger.MergeJson(squashedChildren, child);
-                        }
-                        GenerateFilesWorker(diagReport, generatedSourceFiles, squashedChildren, propertyName, propertyNamespace);
-                        break;                        
-                  }
+		//recurse into children
+		foreach (var kvp in currentNode)
+		{
+			var propertyNamespace = $"{currentNamespace}._{currentClassName}";
+			var jsonKind = kvp.Value.ValueKind;
+			var propertyName = kvp.Key._ConvertToAlphanumericCaps();
+			switch (jsonKind)
+			{
+				case JsonValueKind.Object:
+					{
+						var childNode = kvp.Value.Deserialize<Dictionary<string, JsonElement>>(JsonMerger._serializerOptions)!;
+						GenerateFilesWorker(diagReport, generatedSourceFiles, childNode, propertyName, propertyNamespace);
+					}
+					break;
+				case JsonValueKind.Array:
+					{
 
-               }
-               break;
-            default:
-               //a "primitive" json type, so no need to recurse
-               break;
-         }
-      }
+						var childNodes = kvp.Value.Deserialize<List<JsonElement>>(JsonMerger._serializerOptions)!;
+						//get name of node
+						var arrayTypeName = GetSourceTypeName(kvp.Value, propertyName, propertyNamespace);
+						switch (arrayTypeName)
+						{
+							case "string":
+							case "double":
+							case "bool":
+							case "object": //returns object for null/undefined nodes.  (named nodes for other objects)
+												//no need to recurse
+								break;
+							default:
+								//squash children into singular object then generate for it
+								var squashedChildren = new Dictionary<string, JsonElement>();
+								foreach (var child in childNodes)
+								{
+									JsonMerger.MergeJson(squashedChildren, child);
+								}
+								GenerateFilesWorker(diagReport, generatedSourceFiles, squashedChildren, propertyName, propertyNamespace);
+								break;
+						}
 
-   }
+					}
+					break;
+				default:
+					//a "primitive" json type, so no need to recurse
+					break;
+			}
+		}
+
+	}
 
 }

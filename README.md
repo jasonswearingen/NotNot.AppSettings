@@ -112,7 +112,8 @@ A summary from [TldrLegal](https://www.tldrlegal.com/license/mozilla-public-lice
 **In brief**: You can basically use this project however you want, but all changes to it must be open sourced.
 
 ## Changes
- 
+
+- `0.11.0` : change appsettings read logic to use "AdditionalFiles" workflow
 - `0.10.x` :  various polish
   - mark generated code with `[CompilerGenerated]`.  
   - readme/nuget tweaks.

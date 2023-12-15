@@ -103,4 +103,9 @@
 
 		</ItemGroup>
 
+		<ItemGroup>
+			<!--attaches this .props file to the target project. required so target project appsettings.json files are included for sourcegen scanning-->
+			<None Update="MsBuildAdditionalFiles.props" Pack="true" PackagePath="build" Visible="true" />
+		</ItemGroup>
+
 </Project>

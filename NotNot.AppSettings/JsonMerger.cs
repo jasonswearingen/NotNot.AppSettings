@@ -1,6 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Text;
 
 namespace NotNot.SourceGenerator.AppSettings;
 
@@ -25,28 +26,46 @@ internal class JsonMerger
       UnmappedMemberHandling = JsonUnmappedMemberHandling.Skip,
       WriteIndented = true,
    };
+
+   public static Dictionary<string, JsonElement> MergeJsonFiles(Dictionary<string, SourceText> sourceTexts, List<Diagnostic> diagReport)
+   {
+	   var mergedObject = new Dictionary<string, JsonElement>();
+
+	   foreach (var pair in sourceTexts)
+	   {
+			var fileName = pair.Key;
+			var sourceText = pair.Value;
+
+		   diagReport._Info($"obtaining settings from {fileName}");
+		   
+			using var jsonDoc = JsonDocument.Parse(sourceText.ToString(), _options);
+
+		   MergeJson(mergedObject, jsonDoc.RootElement);
+	   }
+	   return mergedObject;
+	}
    public static Dictionary<string, JsonElement> MergeJsonFiles(List<FileInfo> fileInfos, List<Diagnostic> diagReport)
    {
-      var mergedObject = new Dictionary<string, JsonElement>();
+	   var mergedObject = new Dictionary<string, JsonElement>();
 
-      foreach (var info in fileInfos)
-      {
-         diagReport._Info($"obtaining settings from {info.FullName}");
+	   foreach (var info in fileInfos)
+	   {
+		   diagReport._Info($"obtaining settings from {info.FullName}");
 
-         using var jsonDoc = JsonDocument.Parse(info.OpenRead(), _options);
+		   using var jsonDoc = JsonDocument.Parse(info.OpenRead(), _options);
 
-         MergeJson(mergedObject, jsonDoc.RootElement);
-      }
-      return mergedObject;
+		   MergeJson(mergedObject, jsonDoc.RootElement);
+	   }
+	   return mergedObject;
    }
 
 
-   /// <summary>
-   /// merges json objects into a single object   /// 
-   /// </summary>
-   /// <param name="target"></param>
-   /// <param name="source"></param>
-   public static void MergeJson(Dictionary<string, JsonElement> target, JsonElement source)
+	/// <summary>
+	/// merges json objects into a single object   /// 
+	/// </summary>
+	/// <param name="target"></param>
+	/// <param name="source"></param>
+	public static void MergeJson(Dictionary<string, JsonElement> target, JsonElement source)
    {
       if(source.ValueKind != JsonValueKind.Object)
       {
