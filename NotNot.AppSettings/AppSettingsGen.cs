@@ -47,13 +47,12 @@ internal class AppSettingsGen : IIncrementalGenerator
 			// Transform additionalFiles to a single Dictionary entry
 			var combinedSourceTextsProvider = additionalFiles.Collect().Select((files, ct) =>
 			{
-				Debug.WriteLine($"additionalFiles = {files.Length}");
+				//Debug.WriteLine($"additionalFiles = {files.Length}");
 				var combinedFiles = new Dictionary<string, SourceText>();
 				foreach (var file in files)
 				{
 
-					Debug.WriteLine($"file = {file.Path}");
-					// Assuming file content is to be stored as SourceText
+					//Debug.WriteLine($"file = {file.Path}");
 					var sourceText = file.GetText(ct);
 					if (sourceText != null)
 					{
@@ -106,7 +105,7 @@ internal class AppSettingsGen : IIncrementalGenerator
 		//}
 	}
 
-	public void ExecuteGenerator_AdditionalFiles(SourceProductionContext spc, string rootNamespace, Dictionary<string, SourceText> combinedSourceTexts)
+	public void ExecuteGenerator_AdditionalFiles(SourceProductionContext spc, string? rootNamespace, Dictionary<string, SourceText> combinedSourceTexts)
 	{
 		var diagReports = new List<Diagnostic>();
 
@@ -123,13 +122,11 @@ internal class AppSettingsGen : IIncrementalGenerator
 		spc._Info("done");
 	}
 	/// <summary>
-	/// for the given fileSearchPattern, will generate strongly typed c# classes for each matched (appsettings).json file found in the projectDirectory
+	/// will generate strongly typed c# classes for each matched (appsettings).json
 	/// </summary>
-	/// <param name="settings"></param>
 	/// <param name="diagReport">helper for accumulating diag messages.  caller should relay them to appropriate log writer afterwards.</param>
-	/// <param name="fileSearchPattern">defaults to "appsettings*.json"</param>
 	/// <returns></returns>
-	public Dictionary<string, SourceText> GenerateSourceFiles_AdditionalFiles(string rootNamespace, Dictionary<string, SourceText> combinedSourceTexts, List<Diagnostic> diagReport)
+	public Dictionary<string, SourceText> GenerateSourceFiles_AdditionalFiles(string? rootNamespace, Dictionary<string, SourceText> combinedSourceTexts, List<Diagnostic> diagReport)
 	{
 
 		var toReturn = new Dictionary<string, SourceText>();
@@ -162,68 +159,6 @@ internal class AppSettingsGen : IIncrementalGenerator
 		return toReturn;
 
 	}
-
-	//public void ExecuteGenerator_FileIo(SourceProductionContext spc, (string? projectDirectory, string? startingNamespace) settings)
-	//{
-	//	var diagReports = new List<Diagnostic>();
-
-	//	var results = GenerateSourceFiles_FileIo(settings, diagReports);
-
-	//	foreach (var report in diagReports)
-	//	{
-	//		spc.ReportDiagnostic(report);
-	//	}
-	//	foreach (var result in results)
-	//	{
-	//		spc.AddSource(result.Key, result.Value);
-	//	}
-	//	spc._Info("done");
-	//}
-	///// <summary>
-	///// for the given fileSearchPattern, will generate strongly typed c# classes for each matched (appsettings).json file found in the projectDirectory
-	///// </summary>
-	///// <param name="settings"></param>
-	///// <param name="diagReport">helper for accumulating diag messages.  caller should relay them to appropriate log writer afterwards.</param>
-	///// <param name="fileSearchPattern">defaults to "appsettings*.json"</param>
-	///// <returns></returns>
-	//public Dictionary<string, SourceText> GenerateSourceFiles_FileIo((string? projectDirectory
-	//	, string? startingNamespace) settings, List<Diagnostic> diagReport
-	//	, string fileSearchPattern = "appsettings*.json")
-	//{
-	//	var (projectDir, startingNamespace) = settings;
-	//	var toReturn = new Dictionary<string, SourceText>();
-
-	//	if (projectDir is null || startingNamespace is null)
-	//	{
-	//		diagReport._Error($"null required inputs  projectDir={projectDir}, startingNamespace={startingNamespace}");
-	//		return toReturn;
-	//	}
-	//	else
-	//	{
-	//		diagReport._Info($"projectDir {projectDir} ");
-	//	}
-
-	//	startingNamespace = $"{startingNamespace}.AppSettingsGen";
-
-	//	//do stuff with project dir
-	//	var dir = new DirectoryInfo(projectDir);
-	//	var files = dir.EnumerateFiles(fileSearchPattern, SearchOption.TopDirectoryOnly).ToList();
-	//	diagReport._Info($"files count {files.Count()} ");
-
-
-
-
-	//	//merge into one big json
-	//	var allJsonDict = JsonMerger.MergeJsonFiles(files, diagReport);
-
-	//	//generate classes for the entire json hiearchy
-	//	GenerateFilesWorker(diagReport, toReturn, allJsonDict, "AppSettings", $"{startingNamespace}");
-
-	//	AddBinderShims(diagReport, toReturn, startingNamespace);
-
-	//	return toReturn;
-
-	//}
 
 	/// <summary>
 	/// add helper service to automatically populate appsettings from IConfiguration
@@ -488,5 +423,69 @@ public partial class {currentClassName} {{
 		}
 
 	}
+
+
+
+	//public void ExecuteGenerator_FileIo(SourceProductionContext spc, (string? projectDirectory, string? startingNamespace) settings)
+	//{
+	//	var diagReports = new List<Diagnostic>();
+
+	//	var results = GenerateSourceFiles_FileIo(settings, diagReports);
+
+	//	foreach (var report in diagReports)
+	//	{
+	//		spc.ReportDiagnostic(report);
+	//	}
+	//	foreach (var result in results)
+	//	{
+	//		spc.AddSource(result.Key, result.Value);
+	//	}
+	//	spc._Info("done");
+	//}
+	///// <summary>
+	///// for the given fileSearchPattern, will generate strongly typed c# classes for each matched (appsettings).json file found in the projectDirectory
+	///// </summary>
+	///// <param name="settings"></param>
+	///// <param name="diagReport">helper for accumulating diag messages.  caller should relay them to appropriate log writer afterwards.</param>
+	///// <param name="fileSearchPattern">defaults to "appsettings*.json"</param>
+	///// <returns></returns>
+	//public Dictionary<string, SourceText> GenerateSourceFiles_FileIo((string? projectDirectory
+	//	, string? startingNamespace) settings, List<Diagnostic> diagReport
+	//	, string fileSearchPattern = "appsettings*.json")
+	//{
+	//	var (projectDir, startingNamespace) = settings;
+	//	var toReturn = new Dictionary<string, SourceText>();
+
+	//	if (projectDir is null || startingNamespace is null)
+	//	{
+	//		diagReport._Error($"null required inputs  projectDir={projectDir}, startingNamespace={startingNamespace}");
+	//		return toReturn;
+	//	}
+	//	else
+	//	{
+	//		diagReport._Info($"projectDir {projectDir} ");
+	//	}
+
+	//	startingNamespace = $"{startingNamespace}.AppSettingsGen";
+
+	//	//do stuff with project dir
+	//	var dir = new DirectoryInfo(projectDir);
+	//	var files = dir.EnumerateFiles(fileSearchPattern, SearchOption.TopDirectoryOnly).ToList();
+	//	diagReport._Info($"files count {files.Count()} ");
+
+
+
+
+	//	//merge into one big json
+	//	var allJsonDict = JsonMerger.MergeJsonFiles(files, diagReport);
+
+	//	//generate classes for the entire json hiearchy
+	//	GenerateFilesWorker(diagReport, toReturn, allJsonDict, "AppSettings", $"{startingNamespace}");
+
+	//	AddBinderShims(diagReport, toReturn, startingNamespace);
+
+	//	return toReturn;
+
+	//}
 
 }
