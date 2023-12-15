@@ -10,19 +10,15 @@ branches:
     source-branches: []
     is-release-branch: true
   default:
+    mode: ContinuousDelivery
     tag: '{BranchName}'
     regex: ^.*$
-    source-branches: []
+    source-branches: []    
 ignore:
   sha: []
 merge-message-formats: {}
- # release:
-  #   regex: release[/-]
-  #   mode: ContinuousDeployment
-  #   tag: ''
-  #   is-release-branch: true
-  #   source-branches: ['main', 'develop']
-  #   increment: Patch
 ignore:
   sha: []
 merge-message-formats: {}
+assembly-informational-format: '{Major}.{Minor}.{Patch}.{ShortSha}-{UncommittedChanges}-{BranchName}-{WeightedPreReleaseNumber}-{CommitDate}'
+assembly-file-versioning-format: '{Major}.{Minor}.{Patch}.{ShortSha}-{UncommittedChanges}'
