@@ -44,20 +44,20 @@ internal class JsonMerger
 	   }
 	   return mergedObject;
 	}
-   public static Dictionary<string, JsonElement> MergeJsonFiles(List<FileInfo> fileInfos, List<Diagnostic> diagReport)
-   {
-	   var mergedObject = new Dictionary<string, JsonElement>();
+   //public static Dictionary<string, JsonElement> MergeJsonFiles_FileIo(List<FileInfo> fileInfos, List<Diagnostic> diagReport)
+   //{
+	  // var mergedObject = new Dictionary<string, JsonElement>();
 
-	   foreach (var info in fileInfos)
-	   {
-		   diagReport._Info($"obtaining settings from {info.FullName}");
+	  // foreach (var info in fileInfos)
+	  // {
+		 //  diagReport._Info($"obtaining settings from {info.FullName}");
 
-		   using var jsonDoc = JsonDocument.Parse(info.OpenRead(), _options);
+		 //  using var jsonDoc = JsonDocument.Parse(info.OpenRead(), _options);
 
-		   MergeJson(mergedObject, jsonDoc.RootElement);
-	   }
-	   return mergedObject;
-   }
+		 //  MergeJson(mergedObject, jsonDoc.RootElement);
+	  // }
+	  // return mergedObject;
+   //}
 
 
 	/// <summary>

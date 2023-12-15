@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
@@ -26,24 +27,32 @@ internal class AppSettingsGen : IIncrementalGenerator
 		//////if enabled, this will allow you to attach and debug sourcegen when building the target project.
 		//if (!Debugger.IsAttached)
 		//{
-		//   Debugger.Launch();
+		//	Debugger.Launch();
 		//}
 #endif
 
 
 		/////////////  NEW ADDITIONAL FILES WORKFLOW
 		{
+
 			//get appsettings*.json via AdditionalFiles
-			var additionalFiles = context.AdditionalTextsProvider.Where(static file =>
-				file.Path.StartsWith("appsettings.", StringComparison.OrdinalIgnoreCase) &&
-				file.Path.EndsWith(".json", StringComparison.OrdinalIgnoreCase));
+			var regex = new Regex(@"\\appsettings\..*json$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant | RegexOptions.Compiled);
+			var additionalFiles = context.AdditionalTextsProvider.Where(file =>
+			{
+				var result = regex.IsMatch(file.Path);
+				return result;
+			});
+
 
 			// Transform additionalFiles to a single Dictionary entry
 			var combinedSourceTextsProvider = additionalFiles.Collect().Select((files, ct) =>
 			{
+				Debug.WriteLine($"additionalFiles = {files.Length}");
 				var combinedFiles = new Dictionary<string, SourceText>();
 				foreach (var file in files)
 				{
+
+					Debug.WriteLine($"file = {file.Path}");
 					// Assuming file content is to be stored as SourceText
 					var sourceText = file.GetText(ct);
 					if (sourceText != null)
@@ -79,27 +88,22 @@ internal class AppSettingsGen : IIncrementalGenerator
 
 		}
 
-		//////////////  OLD FILE IO WORKFLOW
-		{
-			var projectDirProvider = context.AnalyzerConfigOptionsProvider
-				 .Select(static (provider, ct) =>
-				 {
-					 provider.GlobalOptions.TryGetValue("build_property.projectdir", out string? projectDirectory);
-					 provider.GlobalOptions.TryGetValue("build_property.rootnamespace", out string? assemblyName);
-
-					 return (projectDirectory, assemblyName);
-				 });
-
-
-			context.RegisterSourceOutput(
-				projectDirProvider,
-				 (spc, settings) =>
-				 {
-					 ExecuteGenerator_FileIo(spc, settings);
-
-
-				 });
-		}
+		////////////////  OLD FILE IO WORKFLOW
+		//{
+		//	var projectDirProvider = context.AnalyzerConfigOptionsProvider
+		//		 .Select(static (provider, ct) =>
+		//		 {
+		//			 provider.GlobalOptions.TryGetValue("build_property.projectdir", out string? projectDirectory);
+		//			 provider.GlobalOptions.TryGetValue("build_property.rootnamespace", out string? assemblyName);
+		//			 return (projectDirectory, assemblyName);
+		//		 });
+		//	context.RegisterSourceOutput(
+		//		projectDirProvider,
+		//		 (spc, settings) =>
+		//		 {
+		//			 ExecuteGenerator_FileIo(spc, settings);
+		//		 });
+		//}
 	}
 
 	public void ExecuteGenerator_AdditionalFiles(SourceProductionContext spc, string rootNamespace, Dictionary<string, SourceText> combinedSourceTexts)
@@ -130,15 +134,19 @@ internal class AppSettingsGen : IIncrementalGenerator
 
 		var toReturn = new Dictionary<string, SourceText>();
 
-		if (rootNamespace is null || combinedSourceTexts.Count==0)
+		if (rootNamespace is null)
 		{
-			diagReport._Error($"null required inputs  rootNamespace={rootNamespace}, combinedSourceTexts.Count={combinedSourceTexts.Count}");
+			diagReport._Error($"missing required inputs. rootNamespace={rootNamespace}");
 			return toReturn;
 		}
-		else
+		if (combinedSourceTexts.Count == 0)
 		{
-			diagReport._Info($"rootNamespace={rootNamespace}, combinedSourceTexts.Count={combinedSourceTexts.Count}");
+			diagReport._Error($"No appSettings.json files were found in your project.  SourceGen aborted.");
+			return toReturn;
 		}
+
+		diagReport._Info($"rootNamespace={rootNamespace}, combinedSourceTexts.Count={combinedSourceTexts.Count}");
+
 
 		var startingNamespace = $"{rootNamespace}.AppSettingsGen";
 
@@ -155,70 +163,67 @@ internal class AppSettingsGen : IIncrementalGenerator
 
 	}
 
-	public void ExecuteGenerator_FileIo(SourceProductionContext spc, (string? projectDirectory, string? startingNamespace) settings)
-	{
+	//public void ExecuteGenerator_FileIo(SourceProductionContext spc, (string? projectDirectory, string? startingNamespace) settings)
+	//{
+	//	var diagReports = new List<Diagnostic>();
 
+	//	var results = GenerateSourceFiles_FileIo(settings, diagReports);
 
+	//	foreach (var report in diagReports)
+	//	{
+	//		spc.ReportDiagnostic(report);
+	//	}
+	//	foreach (var result in results)
+	//	{
+	//		spc.AddSource(result.Key, result.Value);
+	//	}
+	//	spc._Info("done");
+	//}
+	///// <summary>
+	///// for the given fileSearchPattern, will generate strongly typed c# classes for each matched (appsettings).json file found in the projectDirectory
+	///// </summary>
+	///// <param name="settings"></param>
+	///// <param name="diagReport">helper for accumulating diag messages.  caller should relay them to appropriate log writer afterwards.</param>
+	///// <param name="fileSearchPattern">defaults to "appsettings*.json"</param>
+	///// <returns></returns>
+	//public Dictionary<string, SourceText> GenerateSourceFiles_FileIo((string? projectDirectory
+	//	, string? startingNamespace) settings, List<Diagnostic> diagReport
+	//	, string fileSearchPattern = "appsettings*.json")
+	//{
+	//	var (projectDir, startingNamespace) = settings;
+	//	var toReturn = new Dictionary<string, SourceText>();
 
-		var diagReports = new List<Diagnostic>();
+	//	if (projectDir is null || startingNamespace is null)
+	//	{
+	//		diagReport._Error($"null required inputs  projectDir={projectDir}, startingNamespace={startingNamespace}");
+	//		return toReturn;
+	//	}
+	//	else
+	//	{
+	//		diagReport._Info($"projectDir {projectDir} ");
+	//	}
 
-		var results = GenerateSourceFiles(settings, diagReports);
+	//	startingNamespace = $"{startingNamespace}.AppSettingsGen";
 
-		foreach (var report in diagReports)
-		{
-			spc.ReportDiagnostic(report);
-		}
-		foreach (var result in results)
-		{
-			spc.AddSource(result.Key, result.Value);
-		}
-		spc._Info("done");
-	}
-	/// <summary>
-	/// for the given fileSearchPattern, will generate strongly typed c# classes for each matched (appsettings).json file found in the projectDirectory
-	/// </summary>
-	/// <param name="settings"></param>
-	/// <param name="diagReport">helper for accumulating diag messages.  caller should relay them to appropriate log writer afterwards.</param>
-	/// <param name="fileSearchPattern">defaults to "appsettings*.json"</param>
-	/// <returns></returns>
-	public Dictionary<string, SourceText> GenerateSourceFiles((string? projectDirectory
-		, string? startingNamespace) settings, List<Diagnostic> diagReport
-		, string fileSearchPattern = "appsettings*.json")
-	{
-		var (projectDir, startingNamespace) = settings;
-		var toReturn = new Dictionary<string, SourceText>();
-
-		if (projectDir is null || startingNamespace is null)
-		{
-			diagReport._Error($"null required inputs  projectDir={projectDir}, startingNamespace={startingNamespace}");
-			return toReturn;
-		}
-		else
-		{
-			diagReport._Info($"projectDir {projectDir} ");
-		}
-
-		startingNamespace = $"{startingNamespace}.AppSettingsGen";
-
-		//do stuff with project dir
-		var dir = new DirectoryInfo(projectDir);
-		var files = dir.EnumerateFiles(fileSearchPattern, SearchOption.TopDirectoryOnly).ToList();
-		diagReport._Info($"files count {files.Count()} ");
+	//	//do stuff with project dir
+	//	var dir = new DirectoryInfo(projectDir);
+	//	var files = dir.EnumerateFiles(fileSearchPattern, SearchOption.TopDirectoryOnly).ToList();
+	//	diagReport._Info($"files count {files.Count()} ");
 
 
 
 
-		//merge into one big json
-		var allJsonDict = JsonMerger.MergeJsonFiles(files, diagReport);
+	//	//merge into one big json
+	//	var allJsonDict = JsonMerger.MergeJsonFiles(files, diagReport);
 
-		//generate classes for the entire json hiearchy
-		GenerateFilesWorker(diagReport, toReturn, allJsonDict, "AppSettings", $"{startingNamespace}");
+	//	//generate classes for the entire json hiearchy
+	//	GenerateFilesWorker(diagReport, toReturn, allJsonDict, "AppSettings", $"{startingNamespace}");
 
-		AddBinderShims(diagReport, toReturn, startingNamespace);
+	//	AddBinderShims(diagReport, toReturn, startingNamespace);
 
-		return toReturn;
+	//	return toReturn;
 
-	}
+	//}
 
 	/// <summary>
 	/// add helper service to automatically populate appsettings from IConfiguration
