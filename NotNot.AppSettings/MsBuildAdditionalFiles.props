@@ -2,6 +2,6 @@
   <!-- See https://aka.ms/dotnet/msbuild/customize for more details on customizing your build -->  
   <ItemGroup>
 	  <!--required so target project appsettings.json files are included for sourcegen scanning-->
-	  <AdditionalFiles Include="appsettings*.json" />
+	  <AdditionalFiles Include="**appsettings*.json" />
   </ItemGroup>
 </Project>
