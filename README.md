@@ -2,16 +2,18 @@
 
 Automatically create strongly typed C# settings objects from AppSettings.json. Uses Source Generators.
 
+Includes a simple deserialization helper for when you are using Dependency Injection, or not.
+
 ## Getting Started
 
-1) Add a `appsettings.json` file to your project *(make sure it's copied to the output)*.
+1) Add an `appsettings.json` file to your project *(make sure it's copied to the output)*.
 2) **[Install this nuget package `NotNot.AppSettings`](https://www.nuget.org/packages/NotNot.AppSettings)**.
 3) Build your project
 4) Use the generated `AppSettings` class in your code. (See the example section below).
 
 ## How it works
 
-During your project's build process, NotNot.AppSettings will parse the  `appsettings*.json` in your project's root folder.  Using source-generators it then creates a set of csharp classes that matches each node in the json hierarchy.
+During your project's build process, NotNot.AppSettings will parse the  `appsettings*.json` in your project's root folder.  These files are all merged into a single schema. Using source-generators it then creates a set of csharp classes that matches each node in the json hierarchy.
 
 After building your project, an `AppSettings` class contains the strongly-typed definitions,
 and an `AppSettingsBinder` helper/loader util will be found under the `{YourProjectRootNamespace}.AppSettingsGen` namespace.
@@ -73,8 +75,16 @@ or `DOTNET_ENVIORNMENT` environment variable is set to `Development`.
 
 ### Intellisense not working for `AppSettings` class
 
-A strongly-typed `AppSettings` (and sub-classes) is recreated every time you build your project. 
+A strongly-typed `AppSettings` (and sub-classes) is recreated every time you build your project.
 This may confuse your IDE and you might need to restart it to get intellisense working again.
+
+### Why are some of my nodes typed as `object`?
+
+Under some circumstances, the type of a node's value in `appsettings.json` would be ambiguous, so `object` is used:
+
+- If the value is `null` or `undefined`
+- If the value is a POJO/Array/primitive in one appsettings file, and a different one of those three in another.
+
 
 ### Tip: Backup generated code in your git repository
 

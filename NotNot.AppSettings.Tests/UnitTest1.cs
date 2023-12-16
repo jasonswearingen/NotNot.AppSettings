@@ -36,7 +36,7 @@ public class EndToEnd
       }
 
       //var results = gen.GenerateSourceFiles_FileIo((startingFolder, "TestInputs"), diagReports);
-      var results = gen.GenerateSourceFiles_AdditionalFiles("TestApp", sourceFiles, diagReports);
+      var results = gen.GenerateSourceFiles("TestApp", sourceFiles, diagReports);
 
 
       

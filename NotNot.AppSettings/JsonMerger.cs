@@ -3,9 +3,12 @@ using System.Text.Json.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 
-namespace NotNot.SourceGenerator.AppSettings;
+namespace NotNot.AppSettings;
 
-internal class JsonMerger
+/// <summary>
+/// helper to merge json files into a single object
+/// </summary>
+internal static class JsonMerger
 {
    public static JsonDocumentOptions _options = new JsonDocumentOptions
    {
@@ -44,20 +47,22 @@ internal class JsonMerger
 	   }
 	   return mergedObject;
 	}
-   //public static Dictionary<string, JsonElement> MergeJsonFiles_FileIo(List<FileInfo> fileInfos, List<Diagnostic> diagReport)
-   //{
-	  // var mergedObject = new Dictionary<string, JsonElement>();
+	
+	//[Obsolete("uses File.IO to read.  Works but frowned upon for sourcegen.  Switched to SourceText",true)]
+	//public static Dictionary<string, JsonElement> MergeJsonFiles_FileIo(List<FileInfo> fileInfos, List<Diagnostic> diagReport)
+	//{
+	//	var mergedObject = new Dictionary<string, JsonElement>();
 
-	  // foreach (var info in fileInfos)
-	  // {
-		 //  diagReport._Info($"obtaining settings from {info.FullName}");
+	//	foreach (var info in fileInfos)
+	//	{
+	//		diagReport._Info($"obtaining settings from {info.FullName}");
 
-		 //  using var jsonDoc = JsonDocument.Parse(info.OpenRead(), _options);
+	//		using var jsonDoc = JsonDocument.Parse(info.OpenRead(), _options);
 
-		 //  MergeJson(mergedObject, jsonDoc.RootElement);
-	  // }
-	  // return mergedObject;
-   //}
+	//		MergeJson(mergedObject, jsonDoc.RootElement);
+	//	}
+	//	return mergedObject;
+	//}
 
 
 	/// <summary>

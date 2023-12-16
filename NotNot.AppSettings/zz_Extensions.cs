@@ -2,7 +2,7 @@
 using System.Text;
 using Microsoft.CodeAnalysis;
 
-namespace NotNot.SourceGenerator.AppSettings;
+namespace NotNot.AppSettings;
 
 internal static class zz_Extensions
 {
