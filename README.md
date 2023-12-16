@@ -123,8 +123,6 @@ A summary from [TldrLegal](https://www.tldrlegal.com/license/mozilla-public-lice
 
 ## Changes
 
-- `0.11.0` : change appsettings read logic to use "AdditionalFiles" workflow
-- `0.10.x` :  various polish
-  - mark generated code with `[CompilerGenerated]`.  
-  - readme/nuget tweaks.
-- `0.10.0` : Initial Release.
+- **`1.0.0`** : polish and readme tweaks.  **Put a fork in it, it's done!**
+- **`0.12.0`** : change appsettings read logic to use "AdditionalFiles" workflow instead of File.IO
+- **`0.10.0`** : Initial Release.
