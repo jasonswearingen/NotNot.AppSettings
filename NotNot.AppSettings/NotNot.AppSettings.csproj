@@ -63,7 +63,7 @@
 		<ItemGroup>
 		  <EditorConfigFiles Remove="C:\repos\vUnified\dev\public\NotNot.SourceGenerator.AppSettings\.editorconfig" />
 		  <PackageReference Include="GitVersion.MsBuild" Version="5.12.0">
-			  <!--version automatically-->
+			  <!--version assembly automatically based on git commmit.   can configure version layout via gitversion.yml-->
 			  <PrivateAssets>All</PrivateAssets>
 		  </PackageReference>
 			
