@@ -30,8 +30,8 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.8.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="xunit" Version="2.6.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.5">
+    <PackageReference Include="xunit" Version="2.6.4" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.6">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
@@ -42,7 +42,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NotNot.AppSettings\NotNot.AppSettings.csproj" />
+	  <ProjectReference Include="..\NotNot.AppSettings\NotNot.AppSettings.csproj">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive; generators</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>		  
+	  </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>
