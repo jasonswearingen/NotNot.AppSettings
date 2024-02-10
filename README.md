@@ -109,6 +109,13 @@ This way you can check it into source control and have a backup of the generated
 
 - If you find value from this project, consider sponsoring.
 
+### Nuget
+
+- current version is set via GitVersion.yml
+- `main` branch to create prerelease packages
+- `release` branch to create release packages
+
+
 ## Acknowledgments
 
 - This project was inspired by https://github.com/FrodeHus/AppSettingsSourceGenerator which unfortunately did not match my needs in fundamental ways.
@@ -123,6 +130,8 @@ A summary from [TldrLegal](https://www.tldrlegal.com/license/mozilla-public-lice
 
 ## Changes
 
+- **`1.1.1`** : make the nuget package `<PrivateAsset>` so only the project that directly references it uses it. 
+  - (needed for example: test projects)
 - **`1.0.0`** : polish and readme tweaks.  **Put a fork in it, it's done!**
 - **`0.12.0`** : change appsettings read logic to use "AdditionalFiles" workflow instead of File.IO
 - **`0.10.0`** : Initial Release.
