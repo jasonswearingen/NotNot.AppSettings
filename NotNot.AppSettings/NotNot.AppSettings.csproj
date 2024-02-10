@@ -111,5 +111,9 @@
 			<!--attaches this .props file to the target project. required so target project appsettings.json files are included for sourcegen scanning-->
 			<None Update="NotNot.AppSettings.props" Pack="true" PackagePath="build" Visible="true" />
 		</ItemGroup>
+	
+		<ItemGroup>
+			<None Include="NotNot.AppSettings.targets" Pack="true" PackagePath="build\"/>
+		</ItemGroup>
 
 </Project>
