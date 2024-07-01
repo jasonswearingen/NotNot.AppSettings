@@ -14,8 +14,9 @@
 		<InvariantGlobalization>true</InvariantGlobalization>
 	</PropertyGroup>
 
+	<!--LOCAL DEV NOTES:  To reference `.csproj`, not Nuget: Add ` OutputItemType="Analyzer" ReferenceOutputAssembly="false"` to the `ProjectReference`-->
 
-		<!--BS scafolding needed for sourcegen to reference nuget packages, see: https://github.com/dotnet/roslyn/discussions/47517#discussioncomment-5787288
+	<!--BS scafolding needed for sourcegen to reference nuget packages, see: https://github.com/dotnet/roslyn/discussions/47517#discussioncomment-5787288
 	ALL the dlls in the package need to be referenced, not just the one you want to use (System.Text.Json) due to it's dependencies
 	-->
 		<ItemGroup>

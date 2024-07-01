@@ -109,6 +109,10 @@ This way you can check it into source control and have a backup of the generated
 
 - If you find value from this project, consider sponsoring.
 
+### Local Development (Reference `.csproj`, not Nuget)
+
+- Add ` OutputItemType="Analyzer" ReferenceOutputAssembly="false"` to the `<ProjectReference/>`
+
 ### Nuget
 
 - current version is set via GitVersion.yml
