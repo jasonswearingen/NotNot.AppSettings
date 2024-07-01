@@ -134,11 +134,11 @@ internal class AppSettingsGen : IIncrementalGenerator
 
 		var toReturn = new Dictionary<string, SourceText>();
 
-		if (rootNamespace is null)
-		{
-			diagReport._Error($"missing required inputs. rootNamespace={rootNamespace}");
-			return toReturn;
-		}
+		//if (rootNamespace is null)
+		//{
+		//	diagReport._Error($"missing required inputs. rootNamespace={rootNamespace}");
+		//	return toReturn;
+		//}
 		if (appSettingsJsonSourceFiles.Count == 0)
 		{
 			diagReport._Error($"No appSettings.json files were found in your project.  SourceGen aborted.");
@@ -148,7 +148,7 @@ internal class AppSettingsGen : IIncrementalGenerator
 		diagReport._Info($"rootNamespace={rootNamespace}, appSettingsJsonSourceFiles.Count={appSettingsJsonSourceFiles.Count}");
 
 
-		var startingNamespace = $"{rootNamespace}.AppSettingsGen";
+		var startingNamespace = string.IsNullOrWhiteSpace(rootNamespace)?"AppSettingsGen" : $"{rootNamespace}.AppSettingsGen";
 
 
 		//merge into one big json
