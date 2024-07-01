@@ -293,6 +293,47 @@ public partial class AppSettingsBinder : IAppSettingsBinder
 		var binder = new AppSettingsBinder(configuration);
 		return binder.AppSettings;
 	}}
+
+	/// <summary>
+	/// helper to create an AppSettings from strings containing your json
+	/// </summary>
+	/// <param name=""appSettingsJsonText""></param>
+	/// <returns></returns>
+	public static AppSettings LoadDirectFromTexts(params string[] appSettingsJsonTexts)
+	{{
+
+		//build a config from the specified files
+		var configurationBuilder = new ConfigurationBuilder();
+
+		IConfigurationRoot RecursiveLoader(Queue<string> textsQueue)
+		{{
+			using var stream = new MemoryStream();
+			using var writer = new StreamWriter(stream);
+
+			if (textsQueue.Count > 0)
+			{{
+				var appSettingsJsonText = textsQueue.Dequeue();
+				writer.Write(appSettingsJsonText);
+				writer.Flush();
+				stream.Position = 0;
+				configurationBuilder.AddJsonStream(stream);
+
+				return RecursiveLoader(textsQueue);
+			}}
+			else
+			{{
+				return configurationBuilder.Build();
+			}}
+		}}
+
+
+		var configuration = RecursiveLoader(new Queue<string>(appSettingsJsonTexts));
+
+
+		//now finally get the appsettings we care about
+		var binder = new AppSettingsBinder(configuration);
+		return binder.AppSettings;
+	}}
 }}
 
 /// <summary>
