@@ -35,7 +35,7 @@
 			<PackageReference Include="System.Memory" Version="4.5.5" GeneratePathProperty="true" PrivateAssets="all" />
 			<PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" GeneratePathProperty="true" PrivateAssets="all" />
 			<PackageReference Include="System.Text.Encodings.Web" Version="8.0.0" GeneratePathProperty="true" PrivateAssets="all" />
-			<PackageReference Include="System.Text.Json" Version="8.0.0" PrivateAssets="all" GeneratePathProperty="true" />
+			<PackageReference Include="System.Text.Json" Version="8.0.4" PrivateAssets="all" GeneratePathProperty="true" />
 			<PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.4" GeneratePathProperty="true" PrivateAssets="all" />
 
 			<None Include="$(PKGSystem_Text_Json)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
