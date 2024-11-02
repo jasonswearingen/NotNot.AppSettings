@@ -89,7 +89,7 @@
 			<RepositoryUrl>https://github.com/jasonswearingen/NotNot.AppSettings</RepositoryUrl>
 			<PackageIcon>[!!]-logos_red_cropped.png</PackageIcon>
 			<PackageReadmeFile>README.md</PackageReadmeFile>
-			<PackageTags>AppSettings; Source Generator; Json; </PackageTags>
+			<PackageTags>AppSettings; SourceGenerator; Json; source; generator; configuration;</PackageTags>
 			<PackageLicenseExpression>MPL-2.0</PackageLicenseExpression>
 		</PropertyGroup>
 
