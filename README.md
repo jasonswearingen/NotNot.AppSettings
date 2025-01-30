@@ -1,3 +1,10 @@
+# IMPORTANT: THIS PROJECT IS MOVING TO https://github.com/NotNotTech/NotNot-MonoRepo/tree/master/src/nuget/NotNot.AppSettings
+- why: I'm moving my public code to a single MonoRepo, to improve the maintainability and make it easier to publish more packages.
+- when: 2025-01-29.   I'll archive this repo in a few days.
+
+
+
+
 # NotNot.AppSettings
 
 Automatically create strongly typed C# settings objects from AppSettings.json. Uses Source Generators.
